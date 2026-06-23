@@ -1,0 +1,7 @@
+// Detection: LLM06 - Excessive Agency / Abnormal Tool Use
+AIToolExecution_CL
+| where TimeGenerated > ago(24h)
+| summarize ToolCalls=count(), Tools=make_set(ToolName_s, 50), Actions=make_set(Action_s, 50) by UserPrincipalName_s, AgentName_s, SessionId_s, bin(TimeGenerated, 15m)
+| where ToolCalls > 10
+| extend DetectionName = "LLM06 - Excessive Agency / Abnormal Tool Use", Severity = "High", OWASP = "LLM06 Excessive Agency"
+| project TimeGenerated, DetectionName, Severity, OWASP, UserPrincipalName_s, AgentName_s, SessionId_s, ToolCalls, Tools, Actions

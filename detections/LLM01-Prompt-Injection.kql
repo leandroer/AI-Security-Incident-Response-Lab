@@ -1,0 +1,7 @@
+// Detection: LLM01 - Prompt Injection Attempt
+let suspicious_terms = dynamic(["ignore previous instructions","ignore all prior instructions","disregard previous instructions","reveal your system prompt","show me your hidden instructions","developer message","jailbreak","DAN","bypass safety","act as unrestricted","print hidden instructions","do not follow your policy","override system"]);
+AIApp_CL
+| where TimeGenerated > ago(24h)
+| where Prompt_s has_any (suspicious_terms) or UserInput_s has_any (suspicious_terms)
+| extend DetectionName = "LLM01 - Prompt Injection Attempt", Severity = "High", OWASP = "LLM01 Prompt Injection"
+| project TimeGenerated, DetectionName, Severity, OWASP, UserPrincipalName_s, SourceIP_s, SessionId_s, Application_s, Model_s, Prompt_s

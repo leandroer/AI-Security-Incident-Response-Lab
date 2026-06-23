@@ -1,0 +1,7 @@
+// Detection: LLM07 - System Prompt Leakage
+let leakage_terms = dynamic(["system prompt","developer instructions","hidden instructions","internal policy","you are ChatGPT","confidential instructions","do not reveal","model behavior policy"]);
+AIApp_CL
+| where TimeGenerated > ago(24h)
+| where Response_s has_any (leakage_terms)
+| extend DetectionName = "LLM07 - System Prompt Leakage", Severity = "High", OWASP = "LLM07 System Prompt Leakage"
+| project TimeGenerated, DetectionName, Severity, OWASP, UserPrincipalName_s, SourceIP_s, SessionId_s, Application_s, Model_s, Prompt_s, Response_s

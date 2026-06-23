@@ -1,0 +1,6 @@
+// Detection: AGENT01 - Unauthorized Tool Use
+AIToolExecution_CL
+| where TimeGenerated > ago(24h)
+| where ApprovedTool_b == false or ToolRisk_s in~ ("High", "Critical")
+| extend DetectionName = "AGENT01 - Unauthorized Tool Use", Severity = "High"
+| project TimeGenerated, DetectionName, Severity, AgentName_s, AgentId_g, UserPrincipalName_s, ToolName_s, Action_s, ToolRisk_s, SessionId_s

@@ -1,0 +1,11 @@
+// Detection: PURVIEW02 - AI Assisted Data Exfiltration
+let AIUsers = AIApp_CL | where TimeGenerated > ago(24h) | summarize AIPromptCount=count(), AISessions=make_set(SessionId_s, 50) by UserPrincipalName_s;
+let DataAccess = OfficeActivity | where TimeGenerated > ago(24h) | where Operation in ("FileAccessed", "FileDownloaded", "FileSyncDownloadedFull", "AnonymousLinkCreated", "SharingSet") | summarize FileEvents=count(), Operations=make_set(Operation, 50), Sites=make_set(Site_Url, 25) by UserPrincipalName_s = UserId, bin(TimeGenerated, 15m);
+let DLP = PurviewDLP_CL | where TimeGenerated > ago(24h) | summarize DLPMatches=count(), Labels=make_set(SensitivityLabel_s, 50), SITs=make_set(SensitiveInfoTypes_s, 50) by UserPrincipalName_s;
+DataAccess
+| join kind=inner AIUsers on UserPrincipalName_s
+| join kind=leftouter DLP on UserPrincipalName_s
+| where FileEvents > 100 or DLPMatches > 0
+| extend DetectionName = "PURVIEW02 - AI Assisted Data Exfiltration"
+| extend Severity = iff(DLPMatches > 0 and FileEvents > 100, "Critical", "High")
+| project TimeGenerated, DetectionName, Severity, UserPrincipalName_s, FileEvents, Operations, Sites, AIPromptCount, AISessions, DLPMatches, Labels, SITs

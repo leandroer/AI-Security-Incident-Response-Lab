@@ -1,0 +1,8 @@
+// Detection: PURVIEW04 - Agent Access to Regulated Data
+let RegulatedData = PurviewDLP_CL | where TimeGenerated > ago(24h) | where SensitiveInfoTypes_s has_any ("SSN", "Credit Card", "HIPAA", "Health", "Passport", "Bank Account", "Tax") or SensitivityLabel_s in~ ("Highly Confidential", "Restricted") | project UserPrincipalName_s, FileName_s, SensitivityLabel_s, SensitiveInfoTypes_s, PolicyName_s;
+Agent365_CL
+| where TimeGenerated > ago(24h)
+| where EventType_s in~ ("DataAccess", "ConnectorExecution", "ToolInvocation")
+| join kind=inner RegulatedData on UserPrincipalName_s
+| extend DetectionName = "PURVIEW04 - Agent Access to Regulated Data", Severity = "Critical"
+| project TimeGenerated, DetectionName, Severity, AgentName_s, AgentId_g, UserPrincipalName_s, ConnectorName_s, Action_s, FileName_s, SensitivityLabel_s, SensitiveInfoTypes_s, PolicyName_s

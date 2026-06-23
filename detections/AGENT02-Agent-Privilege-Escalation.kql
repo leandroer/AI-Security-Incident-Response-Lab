@@ -1,0 +1,7 @@
+// Detection: AGENT02 - Agent Privilege Escalation
+AuditLogs
+| where TimeGenerated > ago(24h)
+| where OperationName has_any ("Add member to role", "Add eligible member", "Update role", "Consent to application", "Add app role assignment")
+| where tostring(InitiatedBy.app.displayName) has_any ("Agent", "Copilot", "AI") or tostring(InitiatedBy.user.userPrincipalName) has_any ("agent", "copilot")
+| extend DetectionName = "AGENT02 - Agent Privilege Escalation", Severity = "Critical"
+| project TimeGenerated, DetectionName, Severity, OperationName, InitiatedBy, TargetResources, Result

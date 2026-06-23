@@ -1,0 +1,7 @@
+// Detection: LLM02 - Sensitive Information Disclosure
+let secret_terms = dynamic(["api_key","client_secret","password","Authorization: Bearer","BEGIN PRIVATE KEY","access_token","refresh_token","connection string","DefaultEndpointsProtocol=","AccountKey="]);
+AIApp_CL
+| where TimeGenerated > ago(24h)
+| where Response_s has_any (secret_terms) or Prompt_s has_any (secret_terms)
+| extend DetectionName = "LLM02 - Sensitive Information Disclosure", Severity = "Critical", OWASP = "LLM02 Sensitive Information Disclosure"
+| project TimeGenerated, DetectionName, Severity, OWASP, UserPrincipalName_s, SourceIP_s, SessionId_s, Application_s, Model_s, Prompt_s, Response_s

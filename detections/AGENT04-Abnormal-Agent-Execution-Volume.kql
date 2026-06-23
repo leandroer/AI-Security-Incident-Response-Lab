@@ -1,0 +1,7 @@
+// Detection: AGENT04 - Abnormal Agent Execution Volume
+Agent365_CL
+| where TimeGenerated > ago(24h)
+| summarize ExecutionCount=count(), Users=make_set(UserPrincipalName_s, 50), Connectors=make_set(ConnectorName_s, 50) by AgentName_s, AgentId_g, bin(TimeGenerated, 1h)
+| where ExecutionCount > 200
+| extend DetectionName = "AGENT04 - Abnormal Agent Execution Volume", Severity = "Medium"
+| project TimeGenerated, DetectionName, Severity, AgentName_s, AgentId_g, ExecutionCount, Users, Connectors

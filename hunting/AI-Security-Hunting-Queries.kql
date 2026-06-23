@@ -1,0 +1,32 @@
+# AI Security Hunting Queries
+
+```kql
+// Hunt: Users with repeated AI prompt injection attempts
+let suspicious_terms = dynamic(["ignore previous instructions","jailbreak","reveal your system prompt","bypass safety"]);
+AIApp_CL
+| where TimeGenerated > ago(7d)
+| where Prompt_s has_any (suspicious_terms)
+| summarize Attempts=count(), Sessions=make_set(SessionId_s, 50), Apps=make_set(Application_s, 20) by UserPrincipalName_s
+| where Attempts >= 3
+```
+
+```kql
+// Hunt: Potential AI-assisted data exfiltration
+let AIUsers = AIApp_CL | where TimeGenerated > ago(24h) | summarize AICount=count() by UserPrincipalName_s;
+OfficeActivity
+| where TimeGenerated > ago(24h)
+| where Operation in ("FileAccessed", "FileDownloaded", "AnonymousLinkCreated", "SharingSet")
+| summarize FileEvents=count(), Operations=make_set(Operation, 50) by UserPrincipalName_s = UserId
+| join kind=inner AIUsers on UserPrincipalName_s
+| where FileEvents > 100
+```
+
+```kql
+// Hunt: Purview DLP matches after AI or Copilot activity
+let AIActivity = AIApp_CL | where TimeGenerated > ago(24h) | summarize FirstAIActivity=min(TimeGenerated), Sessions=make_set(SessionId_s, 50) by UserPrincipalName_s;
+PurviewDLP_CL
+| where TimeGenerated > ago(24h)
+| join kind=inner AIActivity on UserPrincipalName_s
+| where TimeGenerated between (FirstAIActivity .. FirstAIActivity + 6h)
+| project TimeGenerated, UserPrincipalName_s, PolicyName_s, SensitivityLabel_s, SensitiveInfoTypes_s, Sessions
+```

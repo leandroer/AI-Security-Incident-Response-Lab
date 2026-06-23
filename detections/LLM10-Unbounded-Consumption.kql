@@ -1,0 +1,7 @@
+// Detection: LLM10 - Unbounded Consumption
+AIApp_CL
+| where TimeGenerated > ago(24h)
+| summarize TotalTokens=sum(tolong(TotalTokens_d)), PromptCount=count(), Models=make_set(Model_s, 20) by UserPrincipalName_s, Application_s, bin(TimeGenerated, 1h)
+| where TotalTokens > 500000 or PromptCount > 1000
+| extend DetectionName = "LLM10 - Unbounded Consumption / Token Abuse", Severity = "Medium", OWASP = "LLM10 Unbounded Consumption"
+| project TimeGenerated, DetectionName, Severity, OWASP, UserPrincipalName_s, Application_s, TotalTokens, PromptCount, Models

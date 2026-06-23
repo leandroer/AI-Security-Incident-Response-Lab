@@ -1,0 +1,7 @@
+// Detection: PURVIEW01 - Sensitive Data Exposure
+PurviewDLP_CL
+| where TimeGenerated > ago(24h)
+| where PolicyMatch_b == true or Severity_s in~ ("High", "Critical")
+| extend DetectionName = "PURVIEW01 - Sensitive Data Exposure"
+| extend Severity = coalesce(Severity_s, "High")
+| project TimeGenerated, DetectionName, Severity, UserPrincipalName_s, Workload_s, FileName_s, SensitivityLabel_s, SensitiveInfoTypes_s, PolicyName_s, Action_s
