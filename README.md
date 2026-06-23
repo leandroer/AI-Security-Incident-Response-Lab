@@ -94,6 +94,12 @@ AI security detections should correlate these telemetry planes:
 | `PurviewSensitivity_CL` | Sensitivity labels and classification metadata |
 | `PurviewInsiderRisk_CL` | Insider Risk Management alerts and risk indicators |
 
+## Repository Notice
+
+This repository is maintained as a professional cybersecurity portfolio and research project focused on detection engineering, incident response, threat hunting, security automation, and AI security.
+Content is published for educational, technical, and professional reference purposes. This repository is not currently accepting community contributions, pull requests, issue submissions, or feature requests.
+All content is provided as-is and should be reviewed, tested, and validated before use in production environments.
+
 ## Disclaimer
 
 This repository is intended for defensive security research, detection engineering, and incident response education. Validate all detections in a non-production environment before production deployment.
